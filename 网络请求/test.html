@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <style>
+    p {
+      height: 100px !important;
+      background: blue;
+    }
+  </style>
+</head>
+
+<body>
+  <p style="height:200px"></p>
+  <script>
+    var p = document.querySelector('p')
+    console.log(p.style.height)
+    console.log(getComputedStyle(p)['height'])
+  </script>
+</body>
+
+</html>

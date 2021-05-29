@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 完成两个大数字相加 -->
+    <script>
+        function bigNumAdd(num1, num2) {
+            let result = ""
+            let carry = false
+            num1 = num1.split('')
+            num2 = num2.split('')
+            // 当数组的长度都变为0 ，且不在进位时
+            while (num1.length || num2.length || carry) {
+                // 将最后数字和进位一起相加，~~即使是undefined也可以被转为0
+                carry += ~~num1.pop() + ~~num2.pop()
+                // 将进位添加
+                result = carry % 10 + result
+                carry = carry > 9
+            }
+            return result
+        }
+
+
+
+
+        // 实现数组扁平化
+        function flattenArray(arr) {
+            // 首先判断传入的是否是合格数组
+            if (!Array.isArray(arr)) {
+                return
+            }
+            let result = []
+            result = arr.reduce(function (pre, item) {
+                return pre.concat(Array.isArray(item) ? flattenArray(item) : item)
+            }, [])
+            return result
+        }
+        // var res = flattenArray([[1,2,3],[4,5,6]])
+        // console.log(res)
+
+        // 数组去重
+        function unique(arr) {
+            if (Array.isArray(arr) || arr.length < 1) return
+            // let result = []
+            // arr.forEach(function(item){
+            //     if(result.indexOf(item) === -1)result.push(item)
+            // });
+            // return result
+            return [...new Set(arr)]
+        }
+
+
+        // 求两个数的最大公约数
+        // 辗转相除法，大叔除以小数，当没有余数的时候，就是两个数的最大公约数
+        function getMaxCommonDivisor(a, b) {
+            if (b === 0) return a
+            return getMaxCommonDivisor(b, a % b)
+        }
+
+        // 最小公倍,两个数相乘除以最大公约数
+        function getMinCommonMutiple(a, b) {
+            return a * b / getMaxCommonDivisor(a, b)
+        }
+
+        // 判断一个字符串是否为回文字符串
+        function isHuiwen(str) {
+            // 匹配所有非单词和下划线,转为空字符，并且转换小写
+            let reg = /[\W_]/g
+            let newStr = str.replace(reg, "").toLowerCase()
+            let reverStr = newStr.split('').reverse().join('')
+            return str === reverStr
+        }
+
+        // 实现一个累加函数功能sum(1,2,3)(2).valueof()
+        function sum(...args) {
+            let result = 0
+            result = args.reduce(function (pre, item) {
+                return pre + item
+            }, 0)
+            let add = function (...args) {
+                result = args.reduce(function (pre, item) {
+                    return pre + item
+                }, result)
+                return add
+            }
+            add.valueOf = function () {
+                console.log(result)
+            }
+            return add
+        }
+
+
+        // 使用reduce方法实现foreach,map,filter
+
+        function myforEach(arr, handler) {
+            arr.reduce(function (pre, item, index) {
+                handler(item, index)
+            })
+        }
+
+        function mymap(arr, handler) {
+            let res = []
+            arr.reduce(function (pre, item, index) {
+                let mapItem = handler(item, index)
+                res.push(mapItem)
+            })
+            return res
+        }
+
+        function myfilter(arr, handler) {
+            let result = []
+            arr.reduce(function (pre, item, index) {
+                if (handler(item, index)) {
+                    result.push(item)
+                }
+            })
+            return result
+        }
+
+        // 设计一个简单的任务队列，分别在1，3，4秒后打印出"1","2","3"
+        class Queue {
+            constructor() {
+                this.tasks = []
+                this.time = 0
+            }
+            // 原型上的方法
+            addTask(task, t) {
+                this.time += t
+                this.tasks.push([task, this.time])
+                return this
+            }
+            start() {
+                this.tasks.forEach(function (item) {
+                    setTimeout(function () {
+                        item[0]()
+                    }, item[1])
+                })
+            }
+        }
+
+        // 找出英文篇章中最多英文单词
+        function MostWord(article) {
+            if (!article) return
+            // 参数处理,去除文章前后的空格，转换为小写单词
+            article = article.trim().toLowerCase()
+            // 文章中出现的所有单词
+            wordlist = article.match(/[a-z]+/g),
+                // 访问数组
+                visited = [],
+                maxNum = 0
+            maxWord = ''
+            article = " " + wordlist.join(' ') + " "
+            console.log(wordlist)
+            wordlist.forEach(function (item) {
+                if (visited.indexOf(item) < 0) {
+                    // 没有访问过的单词就加入visited数组
+                    visited.push(item)
+                    let word = new RegExp(' ' + item + ' ', 'g')
+                    let num = article.match(word).length
+                    if (num > maxNum) {
+                        maxNum = num
+                        maxWord = item
+                    }
+                }
+            })
+            return maxWord + ' ' + maxNum
+        }
+
+        // 事件派发器
+        class eventEmitter {
+            constructor() {
+                this.events = {}
+            }
+
+            // 添加原型方法
+            // 监听事件
+            on(event, callback) {
+                let callbacks = this.events[event] || []
+                this.events[event] = callbacks.push(callback)
+                return this
+            }
+            // 取消监听事件
+            off(event, callback) {
+                let callbacks = this.events[event]
+                this.events[event] = callbacks && callbacks.filter(function (item) {
+                    return item !== callback
+                })
+                return this
+            }
+
+            emit(event, ...args) {
+                let callbacks = this.events[event]
+                callbacks.forEach(function (fn) {
+                    fn(...args)
+                })
+                return this
+            }
+            // 只触发一次，执行玩回调函数，立马取消事件
+            once(event, callback) {
+                let wrapFun = function (...args) {
+                    callback(...args)
+                    this.off(event, wrapFun)
+                }
+                this.on(event, wrapFun)
+                return this
+            }
+        }
+
+        // 手写观察者模式
+        var events = (function () {
+            var topics = {}
+            return {
+                // 注册监听函数
+                subscribe: function (topic, handler) {
+                    if (!topics.hasownProperties(topic)) {
+                        topics[topic] = []
+                    }
+                    topics[topic].push(handler)
+                },
+
+                // 发布订阅事件
+                publish: function (topic, info) {
+                    if (topics.hasownProperties(topic)) {
+                        topics[topic].forEach(function (fn) {
+                            fn(info)
+                        })
+                    }
+                },
+
+                // 移除一个主题观察者的回调事件
+                remove: function (topic, handler) {
+                    if (topics.hasownProperties(topic)) {
+                        let removeIndex = -1
+                        topics[topic].forEach(function (fn, index) {
+                            if (fn === handler) removeIndex = index
+                        })
+                    }
+                    if (removeIndex >= 0) topics[topic].splice(removeIndex, 1)
+                },
+
+                // 移除所有观察者回调函数
+                removeAll: function (topic) {
+                    if (topics.hasownProperties(topic)) {
+                        topics[topic] = []
+                    }
+                }
+            }
+        })()
+
+        // 手写jsonp
+        function myJsonp(url, params, callback) {
+            let queryString = url.indexOf('?') === -1 ? '?' : '&'
+            for (let key in params) {
+                if (params.hasownProperties(key)) {
+                    queryString += key + "=" + params[key] + '&'
+                }
+            }
+            let mycallback = ''
+            mycallback = 'callback' + Math.random().toString().replace('.', '')
+            let scriptNode = document.createElement('script')
+            scriptNode.url = url + queryString
+            window[mycallback] = function () {
+                callback(...arguments)
+                document.getElementsByTagName('head')[0].removeChild(scriptNode)
+            }
+            document.getElementsByTagName('head')[0].appendChild(scriptNode)
+        }
+
+
+        // 使用闭包实现每隔一秒钟打印1，2，3，4
+        for (var i = 0; i < 5; i++) {
+            (function (i) {
+                setTimeout(function () {
+                    console.log(i)
+                }, i * 1000)
+            })(i)
+        }
+
+        // javascript类型判断函数
+        function myType(value) {
+            if (value === null) return value + ' '
+            if (typeof value === 'object') {
+                let result = Object.prototype.toString().call(value)
+                result = result.split(' ')[1].split('').pop().join('').toLowerCase()
+                return result
+            }
+            // 基本数据类型直接返回
+            else return typeof value
+        }
+
+        // 手写一个promise
+        const PENDING = 'pending'
+        const RESOLVED = 'resolved'
+        const REJECTED = 'rejected'
+        function myPromise(fn) {
+            var self = this
+            this.state = PENDING
+            this.res = null
+            this.resolveCallbacks = []
+            this.rejecteCallbacks = []
+
+            function resolve(value) {
+                if (value instanceof myPromise) {
+                    value.then(resolve, reject)
+                }
+                //在本轮事件循环最后执行
+                setTimeout(function () {
+                    if (self.state === PENDING) {
+                        self.state = RESOLVED
+                        self.value = value
+                        self.resolveCallbacks.forEach(function (callback) {
+                            callback(value)
+                        })
+                    }
+                }, 0)
+            }
+
+            function reject(value) {
+                setTimeout(function () {
+                    if (self.state === PENDING) {
+                        self.state = REJECTED
+                        this.value = value
+                        self.resolveCallbacks.forEach(function (callback) {
+                            callback(value)
+                        })
+                    }
+                }, 0)
+            }
+
+            try {
+                fn(resolve, reject)
+            } catch (e) {
+                reject(e)
+            }
+        }
+
+        myPromise.prototype.then = function (onresolved, onrejected) {
+            onresolved = typeof onresolved === 'function' ? onresolved : function (value) {
+                return value
+            }
+            onrejected = typeof onrejected === 'function' ? onrejected : function (err) {
+                throw err
+            }
+            if (this.state === PENDING) {
+                this.resolveCallbacks.push(onresolved)
+                this.rejecteCallbacks.push(onrejected)
+            }
+            if (this.state === RESOLVED) {
+                onresolved(this.value)
+            }
+            if (this.state === REJECTED) {
+                onrejected(this.value)
+            }
+        }
+
+        // 使用settimeout模拟定时器
+        function mysetInterval(fn, timeout) {
+            var timer = {
+                flag: true
+            }
+            function interval() {
+                if (timer.flag) {
+                    fn()
+                    setTimeout(interval, timeout);
+                }
+
+            }
+            setTimeout(interval, timeout);
+            return timer
+        }
+
+
+        //函数科里化
+        function curry(fn, args) {
+            let length = fn.length
+            args = args || []
+            return function () {
+                let subArgs = args.slice(0)
+                for (let i = 0; i < arguments.length; i++) {
+                    subArgs.push(arguments[i])
+                }
+                if (subArgs.length >= length) {
+                    return fn.apply(this, subArgs)
+                } else {
+                    return curry.call(this, fn, subArgs)
+                }
+            }
+        }
+
+        // 手写call,apply,bind
+        Function.prototype.call = function (context) {
+            if (typeof this !== 'function') {
+                console.error('类型错误');
+            }
+            let args = [...arguments].slice(1)
+            let res = null
+            context = context || window
+            context.fn = this
+            res = context.fn(...args)
+            delete context.fn
+            return res
+        }
+
+        Function.prototype.apply = function (context) {
+            if (typeof this !== 'function') {
+                console.error('类型错误');
+            }
+            let res = null
+            if (arguments[1]) {
+                res = context.fn(...arguments[1])
+            } else {
+                res = context.fn()
+            }
+            delete context.fn
+            return res
+        }
+
+        Function.prototype.bind = function (context) {
+            if (typeof this !== 'function') {
+                console.error('类型错误');
+            }
+            let args = [...arguments].slice(1)
+            return function Fn() {
+                return fn.apply(this instanceof Fn ? this : context, args.concat(...arguments))
+            }
+        }
+
+        // js中的深浅拷贝
+        function shallowCopy(object) {
+            if (!object || typeof object !== 'object') return
+            let newObject = null
+            newObject = Array.isArray(object) ? [] : {}
+            for (let key in object) {
+                if (object.hasownProperties(key)) {
+                    newObject[key] = object[key]
+                }
+            }
+            return newObject
+        }
+
+        function deepCopy(object) {
+            if (!object || typeof object !== 'object') return
+            let newObject = null
+            newObject = Array.isArray(object) ? [] : {}
+            for (let key in object) {
+                if (object.hasownProperties(key)) {
+                    newObject[key] = typeof object[key] === 'object' ? deepCopy(object[key]) : object[key]
+                }
+            }
+            return newObject
+        }
+
+        // 节流和防抖
+        function debounce(fn, timeout) {
+            var timer = null
+            return function () {
+                var context = this,
+                    args = arguments
+                if (timer) {
+                    clearInterval(timer)
+                    timer = null
+                }
+                timer = setTimeout(function () {
+                    fn.apply(context, args)
+                }, timeout);
+            }
+        }
+
+        function throttle(fn, delay) {
+            var pre = Date.now()
+            return function () {
+                var context = this,
+                    args = arguments,
+                    now = Date.now()
+                if (now - pre >= delay) {
+                    pre = Date.now()
+                    return fn.apply(context, args)
+                }
+            }
+        }
+
+
+        // Ajax发送请求
+        function getJson(url) {
+            return new Promise((resolve, reject) => {
+                let xhr = new XMLHttpRequest()
+                xhr.open('get', url, true)
+                xhr.onreadystatechange = function () {
+                    if (this.readyState !== 4) return
+                    if (this.status === '200') {
+                        resolve(this.response)
+                    } else {
+                        reject(new Error(this.statusText))
+                    }
+                }
+                xhr.onerror = function () {
+                    reject(new Error(this.statusText))
+                }
+                xhr.responseType = 'json'
+                xhr.setRequestHeader('accept', 'application/json')
+                xhr.send(null)
+            })
+        }
+
+        // 实现一个new操作符
+        function newObject() {
+            let constructor = Array.prototype.shift.call(arguments)
+            if (typeof constructor !== 'function') {
+                console.error('type error')
+                return
+            }
+            // 新建一个空对象对象的原型为构造函数的原型
+            let newO = Object.create(constructor.prototype)
+            let res = null
+            res = constructor.apply(newO, arguments)
+            let flag = res && (typeof res === 'object' || typeof res === 'function')
+            if (flag) return res
+            else return newO
+        }
+
+        // 实现instanceof 判断构造函数的 prototype 属性是否出现在对象的原型链中的任何位置
+        function myInstanceof(left, right) {
+            let proto = Object.getPrototypeOf(left)
+            let prototype = right.prototype
+            while (true) {
+                if (!proto) return false
+                if (proto === prototype) return true
+                proto = Object.getPrototypeOf(proto)
+            }
+        }
+
+        // 通用的事件监听器函数
+        const EventUtils = {
+            addEvent: function (el, type, handler) {
+                if (el.addEventListener) {
+                    el.addEventListener(type, handler, false)
+                } else if (el.attachEvent) {
+                    el.attachEvent('on' + type, handler)
+                } else {
+                    el['on' + type] = handler
+                }
+            },
+
+            removeEvent: function (el, type, handler) {
+                if (el.removeEventListener) {
+                    el.removeEventListener(type, handler, false)
+                } else if (el.detachEvent) {
+                    el.detachEvent('on' + type, handler)
+                } else {
+                    el['on' + type] = null
+                }
+            },
+            // 
+            getTarget: function (event) {
+                return event.target || event.srcElement
+            },
+            getEvent: function () {
+                return event || window.event
+            },
+            stopPropagation: function (event) {
+                if (event.stopPropagation) {
+                    event.stopPropagation()
+                } else {
+                    event.cancelBubble = true;
+                }
+            },
+            prevenDefault: function (event) {
+                if (event.prevenDefault) {
+                    event.prevenDefault()
+                } else {
+                    event.returnValue = false
+                }
+            }
+        }
+
+
+        // 寄生组合式继承
+        function inheritPrototype(subType, superType) {
+            let prototype = superType.prototype
+            prototype.constructor = subType
+            subType.prototype = prototypeS
+        }
+
+        // 数组的随机排序
+        function randomSort(arr) {
+            let result = []
+            while (arr.length > 0) {
+                let randomIndex = Math.floor(Math.random() * arr.length)
+                result.push(arr[randomIndex])
+                arr.splice(randomIndex, 1)
+            }
+            return result
+        }
+
+        // promise.all
+        Promise.all = arr => {
+            let allres = []
+            return new Promise((resolve, reject) => {
+                let i = 0
+                next()
+                function next() {
+                    arr[i].then(function (res) {
+                        allres.push(res)
+                        i++
+                        if (i === arr.length) return resolve(allres)
+                        else next()
+                    })
+                }
+            })
+        }
+
+        Promise.race = arr => {
+            return new Promise((resolve, reject) => {
+                let i = 0
+                while (i < arr.length) {
+                    arr[i].then(function (res) {
+                        resolve(res)
+                    }).catch(err => reject(err))
+                    i++
+                }
+            })
+        }
+
+
+        console.log('-------')
+        var a = []
+        for (var i = 0; i < 10; i++) {
+            var c = i
+            a[i] = function () {
+                console.log(c)
+            }
+        }
+        a[6]()
+    </script>
+</body>
+
+</html>
